@@ -2,7 +2,12 @@ package models.entity;
 
 import javax.persistence.*;
 
-@Entity
+@NamedQueries({
+	@NamedQuery(
+			name="Goods.list",
+			query = "SELECT g FROM Goods g ORDER BY g.regDt DESC"
+	)
+})
 public class Goods extends BaseEntity {
 	
 	@Id @GeneratedValue

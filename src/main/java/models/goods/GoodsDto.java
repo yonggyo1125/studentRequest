@@ -3,6 +3,7 @@ package models.goods;
 import javax.validation.constraints.NotBlank;
 
 import models.BaseDto;
+import models.entity.Goods;
 
 public class GoodsDto extends BaseDto {
 	
@@ -40,5 +41,33 @@ public class GoodsDto extends BaseDto {
 	public String toString() {
 		return "GoodsDto [goodsNo=" + goodsNo + ", goodsNm=" + goodsNm + ", goodsPrice=" + goodsPrice + ", regDt="
 				+ regDt + ", modDt=" + modDt + "]";
+	}
+	
+	public static Goods toEntity(GoodsDto goods) {
+		if (goods == null) {
+			return null;
+		}
+		
+		Goods entity = new Goods();
+		entity.setGoodsNo(goods.getGoodsNo());
+		entity.setGoodsNm(goods.getGoodsNm());
+		entity.setGoodsPrice(goods.getGoodsNo());
+		
+		return entity;
+	}
+	
+	public static GoodsDto toDto(Goods entity) {
+		if (entity == null) {
+			return null;
+		}
+		
+		GoodsDto goods = new GoodsDto();
+		goods.setGoodsNo(entity.getGoodsNo());
+		goods.setGoodsNm(entity.getGoodsNm());
+		goods.setGoodsPrice(entity.getGoodsNo());
+		goods.setRegDt(entity.getRegDt());
+		goods.setModDt(entity.getModDt());
+		
+		return goods;
 	}
 }

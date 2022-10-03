@@ -2,23 +2,38 @@ package models.entity;
 
 import javax.persistence.*;
 
+import constants.OrderStatus;
 import constants.PayMethod;
 
 @Entity
-public class Order extends BaseEntity {
+public class Orders extends BaseEntity {
 	@Id @GeneratedValue
 	private Long orderNo; // 주문번호
+	
+	@Enumerated(EnumType.STRING)
+	@Column(length=30, nullable=false)
+	private OrderStatus orderStatus = OrderStatus.PROGRESS; // 주문상태
+	
+	@Column(length=40, nullable=false)
 	private String orderer; // 주문자명
+	@Column(length=100, nullable=false)
 	private String orderEmail; // 주문자 이메일
+	@Column(length=11, nullable=false)
 	private String orderCellPhone; // 주문자 휴대전화
+	@Column(length=40, nullable=false)
 	private String receiver; // 받는사람명
+	@Column(length=11, nullable=false)
 	private String receiverCellPhone; // 받는사람 휴대전화
+	@Column(length=6, nullable=false)
 	private String receiverZonecode; // 받는사람 우편번호
+	@Column(length=100, nullable=false)
 	private String receiverAddress; // 받는사람 주소
+	@Column(length=100, nullable=false)
 	private String receiverAddressSub; // 받는사람 나머지 주소
 	private String deliveryMemo; // 배송 요청사항
 	
 	@Enumerated(EnumType.STRING)
+	@Column(length=30)
 	private PayMethod payMethod; // 결제방식
 	
 	private Long payPrice; // 결제금액 
@@ -34,6 +49,14 @@ public class Order extends BaseEntity {
 		this.orderNo = orderNo;
 	}
 	
+	public OrderStatus getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(OrderStatus orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
 	public String getOrderer() {
 		return orderer;
 	}

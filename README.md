@@ -16,10 +16,26 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class BaseEntity {
 	
 	@CreationTimestamp
-	private LocalDateTime regDt;
+	protected LocalDateTime regDt;
 	
 	@UpdateTimestamp
-	private LocalDateTime modDt;
+	protected LocalDateTime modDt;
+
+	public LocalDateTime getRegDt() {
+		return regDt;
+	}
+
+	public void setRegDt(LocalDateTime regDt) {
+		this.regDt = regDt;
+	}
+
+	public LocalDateTime getModDt() {
+		return modDt;
+	}
+
+	public void setModDt(LocalDateTime modDt) {
+		this.modDt = modDt;
+	}
 }
 ```
 
@@ -30,7 +46,12 @@ package models.entity;
 
 import javax.persistence.*;
 
-@Entity
+@NamedQueries({
+	@NamedQuery(
+			name="Goods.list",
+			query = "SELECT g FROM Goods g ORDER BY g.regDt DESC"
+	)
+})
 public class Goods extends BaseEntity {
 	
 	@Id @GeneratedValue
@@ -64,7 +85,6 @@ public class Goods extends BaseEntity {
 		this.goodsPrice = goodsPrice;
 	}
 }
-
 ```
 
 #### constants.PayMethod.java
@@ -80,6 +100,23 @@ public enum PayMethod {
 
 ```
 
+#### constants.OrderStatus.java
+
+```java
+package constants;
+
+public enum OrderStatus {
+	PROGRESS, // 주문 진행중 
+	REQUEST, // 입금 요청 중 
+	INCASH, // 입금확인
+	PREPARE, // 상품준비중
+	DELIVERY, // 배송중 
+	ARRIVAL,  // 배송완료
+	DONE, // 주문완료
+	FAILED // 주문실패
+}
+```
+
 #### models.entity.Order.java
 
 ```java
@@ -87,23 +124,38 @@ package models.entity;
 
 import javax.persistence.*;
 
+import constants.OrderStatus;
 import constants.PayMethod;
 
 @Entity
 public class Order extends BaseEntity {
 	@Id @GeneratedValue
 	private Long orderNo; // 주문번호
+	
+	@Enumerated(EnumType.STRING)
+	@Column(length=30, nullable=false)
+	private OrderStatus orderStatus; // 주문상태
+	
+	@Column(length=40, nullable=false)
 	private String orderer; // 주문자명
+	@Column(length=100, nullable=false)
 	private String orderEmail; // 주문자 이메일
+	@Column(length=11, nullable=false)
 	private String orderCellPhone; // 주문자 휴대전화
+	@Column(length=40, nullable=false)
 	private String receiver; // 받는사람명
+	@Column(length=11, nullable=false)
 	private String receiverCellPhone; // 받는사람 휴대전화
+	@Column(length=6, nullable=false)
 	private String receiverZonecode; // 받는사람 우편번호
+	@Column(length=100, nullable=false)
 	private String receiverAddress; // 받는사람 주소
+	@Column(length=100, nullable=false)
 	private String receiverAddressSub; // 받는사람 나머지 주소
 	private String deliveryMemo; // 배송 요청사항
 	
 	@Enumerated(EnumType.STRING)
+	@Column(length=30)
 	private PayMethod payMethod; // 결제방식
 	
 	private Long payPrice; // 결제금액 
@@ -119,6 +171,14 @@ public class Order extends BaseEntity {
 		this.orderNo = orderNo;
 	}
 	
+	public OrderStatus getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(OrderStatus orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
 	public String getOrderer() {
 		return orderer;
 	}
@@ -258,19 +318,40 @@ package models.entity;
 
 import javax.persistence.*;
 
+import constants.OrderStatus;
+import constants.PayMethod;
+
 @Entity
-public class Order extends BaseEntity {
+public class Orders extends BaseEntity {
 	@Id @GeneratedValue
 	private Long orderNo; // 주문번호
+	
+	@Enumerated(EnumType.STRING)
+	@Column(length=30, nullable=false)
+	private OrderStatus orderStatus = OrderStatus.PROGRESS; // 주문상태
+	
+	@Column(length=40, nullable=false)
 	private String orderer; // 주문자명
+	@Column(length=100, nullable=false)
 	private String orderEmail; // 주문자 이메일
+	@Column(length=11, nullable=false)
 	private String orderCellPhone; // 주문자 휴대전화
+	@Column(length=40, nullable=false)
 	private String receiver; // 받는사람명
+	@Column(length=11, nullable=false)
 	private String receiverCellPhone; // 받는사람 휴대전화
+	@Column(length=6, nullable=false)
 	private String receiverZonecode; // 받는사람 우편번호
+	@Column(length=100, nullable=false)
 	private String receiverAddress; // 받는사람 주소
+	@Column(length=100, nullable=false)
 	private String receiverAddressSub; // 받는사람 나머지 주소
 	private String deliveryMemo; // 배송 요청사항
+	
+	@Enumerated(EnumType.STRING)
+	@Column(length=30)
+	private PayMethod payMethod; // 결제방식
+	
 	private Long payPrice; // 결제금액 
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -284,6 +365,14 @@ public class Order extends BaseEntity {
 		this.orderNo = orderNo;
 	}
 	
+	public OrderStatus getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(OrderStatus orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
 	public String getOrderer() {
 		return orderer;
 	}
@@ -364,6 +453,14 @@ public class Order extends BaseEntity {
 		this.payPrice = payPrice;
 	}
 
+	public PayMethod getPayMethod() {
+		return payMethod;
+	}
+
+	public void setPayMethod(PayMethod payMethod) {
+		this.payMethod = payMethod;
+	}
+
 	public Goods getGoods() {
 		return goods;
 	}
@@ -382,6 +479,7 @@ package models.goods;
 import javax.validation.constraints.NotBlank;
 
 import models.BaseDto;
+import models.entity.Goods;
 
 public class GoodsDto extends BaseDto {
 	
@@ -420,6 +518,34 @@ public class GoodsDto extends BaseDto {
 		return "GoodsDto [goodsNo=" + goodsNo + ", goodsNm=" + goodsNm + ", goodsPrice=" + goodsPrice + ", regDt="
 				+ regDt + ", modDt=" + modDt + "]";
 	}
+	
+	public static Goods toEntity(GoodsDto goods) {
+		if (goods == null) {
+			return null;
+		}
+		
+		Goods entity = new Goods();
+		entity.setGoodsNo(goods.getGoodsNo());
+		entity.setGoodsNm(goods.getGoodsNm());
+		entity.setGoodsPrice(goods.getGoodsNo());
+		
+		return entity;
+	}
+	
+	public static GoodsDto toDto(Goods entity) {
+		if (entity == null) {
+			return null;
+		}
+		
+		GoodsDto goods = new GoodsDto();
+		goods.setGoodsNo(entity.getGoodsNo());
+		goods.setGoodsNm(entity.getGoodsNm());
+		goods.setGoodsPrice(entity.getGoodsNo());
+		goods.setRegDt(entity.getRegDt());
+		goods.setModDt(entity.getModDt());
+		
+		return goods;
+	}
 }
 ```
 
@@ -431,12 +557,15 @@ package models.orders;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
+import constants.OrderStatus;
 import constants.PayMethod;
+import models.BaseDto;
 import models.entity.Goods;
+import models.entity.Orders;
 
-public class OrderDto {
+public class OrderDto extends BaseDto {
 	private Long orderNo; // 주문번호
-	
+	private OrderStatus orderStatus; // 주문상태
 	@NotBlank(message="주문자명을 입력하세요.")
 	private String orderer; // 주문자명
 	@NotBlank(message="주문자 이메일을 입력하세요.")
@@ -469,6 +598,14 @@ public class OrderDto {
 		this.orderNo = orderNo;
 	}
 	
+	public OrderStatus getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(OrderStatus orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
 	public String getOrderer() {
 		return orderer;
 	}
@@ -567,13 +704,119 @@ public class OrderDto {
 
 	@Override
 	public String toString() {
-		return "OrderDto [orderNo=" + orderNo + ", orderer=" + orderer + ", orderEmail=" + orderEmail
-				+ ", orderCellPhone=" + orderCellPhone + ", receiver=" + receiver + ", receiverCellPhone="
-				+ receiverCellPhone + ", receiverZonecode=" + receiverZonecode + ", receiverAddress=" + receiverAddress
-				+ ", receiverAddressSub=" + receiverAddressSub + ", deliveryMemo=" + deliveryMemo + ", payPrice="
-				+ payPrice + ", payMethod=" + payMethod + ", goods=" + goods + "]";
+		return "OrderDto [orderNo=" + orderNo + ", orderStatus=" + orderStatus + ", orderer=" + orderer
+				+ ", orderEmail=" + orderEmail + ", orderCellPhone=" + orderCellPhone + ", receiver=" + receiver
+				+ ", receiverCellPhone=" + receiverCellPhone + ", receiverZonecode=" + receiverZonecode
+				+ ", receiverAddress=" + receiverAddress + ", receiverAddressSub=" + receiverAddressSub
+				+ ", deliveryMemo=" + deliveryMemo + ", payPrice=" + payPrice + ", payMethod=" + payMethod + ", goods="
+				+ goods + ", regDt=" + regDt + ", modDt=" + modDt + "]";
+	}
+	
+	public static Orders toEntity(OrderDto order) {
+		if (order == null) {
+			return null;
+		}
+		
+		Orders entity = new Orders();
+		entity.setOrderNo(order.getOrderNo());
+		entity.setOrderStatus(order.getOrderStatus());
+		entity.setOrderer(order.getOrderer());
+		entity.setOrderEmail(order.getOrderEmail());
+		entity.setOrderCellPhone(order.getOrderCellPhone());
+		entity.setReceiver(order.getReceiver());
+		entity.setReceiverCellPhone(order.getReceiverCellPhone());
+		entity.setReceiverZonecode(order.getReceiverZonecode());
+		entity.setReceiverAddress(order.getReceiverAddress());
+		entity.setReceiverAddressSub(order.getReceiverAddressSub());
+		entity.setGoods(order.getGoods());
+		
+		return entity;
+	}
+	
+	public static OrderDto toDto(Orders entity) {
+		if (entity == null) {
+			return null;
+		}
+		
+		OrderDto order = new OrderDto();
+		order.setOrderNo(entity.getOrderNo());
+		order.setOrderStatus(entity.getOrderStatus());
+		order.setOrderer(entity.getOrderer());
+		order.setOrderEmail(entity.getOrderEmail());
+		order.setOrderCellPhone(entity.getOrderCellPhone());
+		order.setReceiver(entity.getReceiver());
+		order.setReceiverCellPhone(entity.getReceiverCellPhone());
+		order.setReceiverZonecode(entity.getReceiverZonecode());
+		order.setReceiverAddress(entity.getReceiverAddress());
+		order.setReceiverAddressSub(entity.getReceiverAddressSub());
+		order.setGoods(entity.getGoods());
+		
+		return order;
 	}
 }
 ```
 
 * * * 
+# DAO 
+
+## models.entity.Goods.java
+
+```
+package models.goods;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import models.entity.Goods;
+
+public class GoodsDao {
+	
+	@Autowired
+	private EntityManager em;
+	
+	/**
+	 * 상품 등록 
+	 * @param param
+	 */
+	public GoodsDto register(GoodsDto param) {
+		
+		Goods entity = GoodsDto.toEntity(param);
+		em.persist(entity);
+		em.flush();
+		
+		Goods newEntity = em.find(Goods.class, entity.getGoodsNo());
+		return GoodsDto.toDto(newEntity);
+	}
+	
+	/** 
+	 * 상품 조회
+	 * 
+	 */
+	public GoodsDto get(Long goodsNo) {
+		
+		Goods entity = em.find(Goods.class, goodsNo);
+		return GoodsDto.toDto(entity);
+	}
+	
+	/**
+	 * 상품 목록 
+	 * 
+	 */
+	public List<GoodsDto> get(int page, int limit) {
+		page = page <= 0 ? 1:page;
+		limit = limit <= 0 ? 20:limit;
+		int offset = (page - 1) * limit;
+		TypedQuery<Goods> tq = em.createNamedQuery("Goods.list", Goods.class);
+		tq.setFirstResult(offset).setMaxResults(limit);
+		
+		List<GoodsDto> goods = tq.getResultStream().map(GoodsDto::toDto).toList();
+									
+		return goods;
+	}
+}
+```
+
