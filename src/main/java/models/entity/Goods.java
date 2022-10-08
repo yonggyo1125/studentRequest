@@ -8,6 +8,7 @@ import javax.persistence.*;
 			query = "SELECT g FROM Goods g ORDER BY g.regDt DESC"
 	)
 })
+@Entity
 public class Goods extends BaseEntity {
 	
 	@Id @GeneratedValue

@@ -39,6 +39,7 @@ public class Orders extends BaseEntity {
 	private Long payPrice; // 결제금액 
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="goodsNo")
 	private Goods goods; // 상품 정보
 	
 	public Long getOrderNo() {

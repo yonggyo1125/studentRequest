@@ -175,6 +175,7 @@ public class OrderDto extends BaseDto {
 		entity.setReceiverAddress(order.getReceiverAddress());
 		entity.setReceiverAddressSub(order.getReceiverAddressSub());
 		entity.setGoods(order.getGoods());
+		entity.setPayMethod(order.getPayMethod());
 		
 		return entity;
 	}
@@ -196,6 +197,7 @@ public class OrderDto extends BaseDto {
 		order.setReceiverAddress(entity.getReceiverAddress());
 		order.setReceiverAddressSub(entity.getReceiverAddressSub());
 		order.setGoods(entity.getGoods());
+		order.setPayMethod(entity.getPayMethod());
 		
 		return order;
 	}

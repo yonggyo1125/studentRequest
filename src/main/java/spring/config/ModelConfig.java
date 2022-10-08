@@ -5,8 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import(ServiceConfig.class)
-@ComponentScan({"models.goods", "models.order"})
+@ComponentScan({"models"})
 public class ModelConfig {
 
 }

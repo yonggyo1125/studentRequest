@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		layout:decorate="~{layouts/main}">
+		<main layout:fragment="content">
+		<form method="post" th:action="@{/order}" autocomplete="off" th:object="${orderDto}">
+			<dl>
+				<dt>주문자명</dt>
+				<dd>
+					<input type="text" name="orderer" th:field="*{orderer}">
+					<div th:each="err : ${#fields.errors('orderer')}" th:text="${err}"></div>
+				</dd>
+			</dl>
+			<dl>
+				<dt>이메일</dt>
+				<dd>
+					<input type="text" name="orderEmail" th:field="*{orderEmail}">
+					<div th:each="err : ${#fields.errors('orderEmail')}" th:text="${err}"></div>
+				</dd>
+			</dl>
+			<dl>
+				<dt>휴대전화번호</dt>
+				<dd>
+					<input type="text" name="orderCellPhone" th:field="*{orderCellPhone}">
+					<div th:each="err : ${#fields.errors('orderCellPhone')}" th:text="${err}"></div>
+				</dd>
+			</dl>
+			<dl>
+				<dt>받는사람명</dt>
+				<dd>
+					<input type="text" name="receiver" th:field="*{receiver}">
+					<div th:each="err : ${#fields.errors('receiver')}" th:text="${err}"></div>
+				</dd>
+			</dl>
+			<dl>
+				<dt>받는사람 휴대전화</dt>
+				<dd>
+					<input type="text" name="receiverCellPhone" th:field="*{receiverCellPhone}">
+					<div th:each="err : ${#fields.errors('receiverCellPhone')}" th:text="${err}"></div>
+				</dd>
+			</dl>
+			<dl>
+				<dt>우편번호</dt>
+				<dd>
+					<input type="text" name="receiverZonecode" th:field="*{receiverZonecode}">
+					<div th:each="err : ${#fields.errors('receiverZonecode')}" th:text="${err}"></div>
+				</dd>
+			</dl>
+			<dl>
+				<dt>받는사람 주소</dt>
+				<dd>
+					<input type="text" name="receiverAddress" th:field="*{receiverAddress}">
+					<input type="text" name="receiverAddressSub" th:field="*{receiverAddressSub}">
+					<div th:each="err : ${#fields.errors('receiverAddress')}" th:text="${err}"></div>
+				</dd>
+			</dl>
+			<dl>
+				<dt>배송 요청사항</dt>
+				<dd>
+					<input type="text" name="deliveryMemo" th:field="*{deliveryMemo}">
+				</dd>
+			</dl>
+			<dl>
+				<dt>결제방식</dt>
+				<dd>
+					<input type="radio" name="payMethod" value="VBANK" id="payMethod_VBANK"  th:field="*{payMethod}">
+					<label for="payMethod_VBANK">가상계좌</label>
+					<input type="radio" name="payMethod" value="CARD" id="payMethod_CARD" th:field="*{payMethod}">
+					<label for="payMethod_CARD">신용카드</label>
+					
+					<input type="radio" name="payMethod" value="DIRECTBANK" id="payMethod_DIRECTBANK" th:field="*{payMethod}">
+					<label for="payMethod_DIRECTBANK">실시간 계좌이체</label>
+				</dd>
+			</dl>
+			<dl>
+				<dt>결제금액</dt>
+				<dd>1,000원</dd>
+			</dl>
+			<button type="submit">결제하기</button>
+		</form>
+		
+		<th:block th:if="${isPayProcess}">
+			<form id="SendPayForm_id" method="POST"  autocomplete="off" th:object="${orderDto}">
+			    <input type="hidden" name="pg" value="inicis">
+			    <input type="hidden"  name="price" value="1000" >
+			    <input type="hidden"  name="mid" th:value="${mid}" >
+			    <input type="hidden"  name="mKey" th:value="${mKey}" >
+			    <input type="hidden"  name="signature" th:value="${signature}" >
+			    <input type="hidden"  name="oid" th:value="${orderNo}" >
+			    <input type="hidden"  name="timestamp" th:value="${timestamp}" >
+			    <input type="hidden"  name="version" value="1.0" >
+			    <input type="hidden"  name="currency" value="WON" >
+			    <input type="hidden"  name="acceptmethod" value="below1000" ><!-- 에스크로옵션 : useescrow, 빌링(정기과금)옵션 : BILLAUTH(Card) -->
+			    <input type="hidden"  name="returnUrl" th:value="${returnUrl}" >
+			    <input type="hidden"  name="closeUrl" th:value="${closeUrl}" >
+			    <input type="hidden"  name="goodname" value="테스트 상품명" >
+			    <input type="hidden" name="merchantData" value="">
+			    <input type="hidden"    name="buyername" th:value="*{orderer}" >
+				<input type="hidden"    name="buyertel" th:value="*{orderCellPhone}" >
+		        <input type="hidden"   name="buyeremail" th:value="*{orderEmail}" >
+		        <input type="hidden"  name="gopaymethod" th:value="${payMethod}">
+
+		</form>
+		</th:block>
+		</main>
+		
+
+		<th:block th:if="${isPayProcess == true}" layout:fragment="addJs">	
+			<script type="text/javascript" src="https://stdpay.inicis.com/stdjs/INIStdPay.js" charset="UTF-8"></script>
+			<script>
+			window.addEventListener("DOMContentLoaded", function() {
+				INIStdPay.pay('SendPayForm_id');
+			});
+			</script>
+		</th:block>
+		
+</html>
